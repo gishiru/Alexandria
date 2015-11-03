@@ -141,8 +141,8 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     super.onActivityResult(requestCode, resultCode, data);
 
     if ((requestCode == 0) && (resultCode == getActivity().RESULT_OK)) {
-      String ean = data.getStringExtra(ZXING_SCAN_RESULT_EXTRA);
-      Toast.makeText(getActivity(), ean, Toast.LENGTH_SHORT).show();
+      EditText ean = (EditText)getActivity().findViewById(R.id.ean);
+      ean.setText(data.getStringExtra(ZXING_SCAN_RESULT_EXTRA));
     } else {
       Toast.makeText(getActivity(), getString(R.string.scan_failed), Toast.LENGTH_SHORT).show();
     }
