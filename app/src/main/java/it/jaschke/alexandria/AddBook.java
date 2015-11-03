@@ -31,6 +31,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     private final int LOADER_ID = 1;
     private View rootView;
     private final String EAN_CONTENT="eanContent";
+    private static final int REQUEST_CODE_SCAN = 0;
     private static final String SCAN_FORMAT = "scanFormat";
     private static final String SCAN_CONTENTS = "scanContents";
     private static final String ZXING_PACKAGE_NAME = "com.google.zxing.client.android.SCAN";
@@ -103,7 +104,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
           Intent intent = new Intent(ZXING_PACKAGE_NAME);
           intent.putExtra(TAG, ZXING_SCAN_MODE);
           if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-            startActivityForResult(intent, 0);
+            startActivityForResult(intent, REQUEST_CODE_SCAN);
           } else {
             Log.d(LOG_TAG, getString(R.string.find_app_failed));
           }
@@ -140,7 +141,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
-    if ((requestCode == 0) && (resultCode == getActivity().RESULT_OK)) {
+    if ((requestCode == REQUEST_CODE_SCAN) && (resultCode == getActivity().RESULT_OK)) {
       EditText ean = (EditText)getActivity().findViewById(R.id.ean);
       ean.setText(data.getStringExtra(ZXING_SCAN_RESULT_EXTRA));
     } else {
