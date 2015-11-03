@@ -1,8 +1,11 @@
 package it.jaschke.alexandria;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -82,12 +85,22 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
               clearFields();
               return;
             }
-            //Once we have an ISBN, start a book intent
-            Intent bookIntent = new Intent(getActivity(), BookService.class);
-            bookIntent.putExtra(BookService.EAN, ean);
-            bookIntent.setAction(BookService.FETCH_BOOK);
-            getActivity().startService(bookIntent);
-            AddBook.this.restartLoader();
+
+            // Check network connection before fetch data.
+            NetworkInfo networkInfo = ((ConnectivityManager)getActivity()
+                .getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+            if ((networkInfo != null) && networkInfo.isConnected()) {
+              //Once we have an ISBN, start a book intent
+              Intent bookIntent = new Intent(getActivity(), BookService.class);
+              bookIntent.putExtra(BookService.EAN, ean);
+              bookIntent.setAction(BookService.FETCH_BOOK);
+              getActivity().startService(bookIntent);
+              AddBook.this.restartLoader();
+            } else {
+              Toast.makeText(
+                  getActivity(), getString(R.string.failed_connect_internet), Toast.LENGTH_SHORT)
+                  .show();
+            }
           }
         });
 
@@ -106,7 +119,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
           if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivityForResult(intent, REQUEST_CODE_SCAN);
           } else {
-            Log.d(LOG_TAG, getString(R.string.find_app_failed));
+            Log.d(LOG_TAG, getString(R.string.failed_find_app));
           }
         }
       });
@@ -145,7 +158,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
       EditText ean = (EditText)getActivity().findViewById(R.id.ean);
       ean.setText(data.getStringExtra(ZXING_SCAN_RESULT_EXTRA));
     } else {
-      Toast.makeText(getActivity(), getString(R.string.scan_failed), Toast.LENGTH_SHORT).show();
+      Toast.makeText(getActivity(), getString(R.string.failed_scan), Toast.LENGTH_SHORT).show();
     }
   }
 
